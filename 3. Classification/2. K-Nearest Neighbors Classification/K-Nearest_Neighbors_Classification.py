@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jan 14 23:24:26 2019
+Created on Tue Jan 15 01:12:47 2019
 
 @author: parthgoyal123
 """
 
-''' ----------- Logistic Classification ------------ '''
+''' ----------- KNN ------------ '''
 
 # ---> In classification, feature scaling is must and splitting the data to train and test set is also a must
 
@@ -66,16 +66,16 @@ X_test = scale_X.fit_transform(X_test)
 
 # ======== Classification ========= #
 
-# Fitting the logistic classifier to the training set and predicting results for test set
-from sklearn.linear_model import LogisticRegression
-linear_classifier = LogisticRegression(solver = 'liblinear', random_state = 1)
-linear_classifier.fit(X_train, y_train)
-y_pred = linear_classifier.predict(X_test)
+# Fitting the KNN to the training set and predicting results for test set
+from sklearn.neighbors import KNeighborsClassifier
+knn_classifier = KNeighborsClassifier(n_neighbors=5)
+knn_classifier.fit(X_train, y_train)
+y_pred = knn_classifier.predict(X_test)
 
 # Making the confusion matrix to know how our model did
 # ---> trace of the confusion_matrix represents the correct predictions, else all are wrong predictions
 from sklearn.metrics import confusion_matrix, accuracy_score
-cm_linear = confusion_matrix(y_test, y_pred)
+cm_knn = confusion_matrix(y_test, y_pred)
 accuracy_before = accuracy_score(y_test, y_pred)*100
 
 # Visualising the Training set results (Naive Model)
@@ -84,19 +84,19 @@ fig = plt.figure(dpi = 100, figsize = (8,6))
 X_set, y_set = X_train, y_train
 X1, X2 = np.meshgrid(np.arange(start = X_set[:, 0].min() - 1, stop = X_set[:, 0].max() + 1, step = 0.01),
                      np.arange(start = X_set[:, 1].min() - 1, stop = X_set[:, 1].max() + 1, step = 0.01))
-plt.contourf(X1, X2, linear_classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
+plt.contourf(X1, X2, knn_classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
              alpha = 0.75, cmap = ListedColormap(('red', 'green')))
 plt.xlim(X1.min(), X1.max())
 plt.ylim(X2.min(), X2.max())
 for i, j in enumerate(np.unique(y_set)):
     plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
                 c = ListedColormap(('red', 'green'))(i), label = j, marker = '.', s = 75)
-plt.title('Logistic Classifier (Training set)')
+plt.title('KNN (Training set)')
 plt.xlabel('')
 plt.ylabel('')
 plt.legend()
 plt.show()
-fig.savefig("Logistic_Classification_training_Naive.png")
+fig.savefig("KNN_training_Naive.png")
 
 # Visualising the Test set results (Naive Model)
 from matplotlib.colors import ListedColormap
@@ -104,32 +104,34 @@ fig = plt.figure(dpi = 100, figsize = (8,6))
 X_set, y_set = X_test, y_test
 X1, X2 = np.meshgrid(np.arange(start = X_set[:, 0].min() - 1, stop = X_set[:, 0].max() + 1, step = 0.01),
                      np.arange(start = X_set[:, 1].min() - 1, stop = X_set[:, 1].max() + 1, step = 0.01))
-plt.contourf(X1, X2, linear_classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
+plt.contourf(X1, X2, knn_classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
              alpha = 0.75, cmap = ListedColormap(('red', 'green')))
 plt.xlim(X1.min(), X1.max())
 plt.ylim(X2.min(), X2.max())
 for i, j in enumerate(np.unique(y_set)):
     plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
                 c = ListedColormap(('red', 'green'))(i), label = j, marker = '.', s = 75)
-plt.title('Logistic Classification (Test set)')
+plt.title('KNN (Test set)')
 plt.xlabel('')
 plt.ylabel('')
 plt.legend()
 plt.show()
-fig.savefig("Logistic_Classification_test_Naive.png")
+fig.savefig("KNN_test_Naive.png")
 
 # ===== Enhancing the model ===== #
 
 # --- K-Fold Cross Validation --- #
 from sklearn.model_selection import cross_val_score
-accuracies_before = cross_val_score(estimator = linear_classifier, X = X_train, y = y_train, cv = 10, scoring = 'accuracy')
+accuracies_before = cross_val_score(estimator = knn_classifier, X = X_train, y = y_train, cv = 10, scoring = 'accuracy')
 print('Accuracy Mean before enhancing the model =', accuracies_before.mean())
+accuracy_mean_before = accuracies_before.mean()
 print('Accuracy Standard Deviation before enhancing the model =', accuracies_before.std())
+accuracy_std_before = accuracies_before.std()
 
 # --- Grid-Search --- #
 from sklearn.model_selection import GridSearchCV
-parameters = [{'C' : [0.1, 1, 2, 5, 10], 'solver': ['liblinear', 'sag', 'saga', 'lbfgs']}]
-grid_search = GridSearchCV(estimator = linear_classifier, param_grid= parameters, scoring = 'accuracy', cv = 10)
+parameters = [{'n_neighbors' : [4,5,6,7,8,9,10], 'algorithm': ['ball_tree', 'kd_tree', 'brute', 'auto']}]
+grid_search = GridSearchCV(estimator = knn_classifier, param_grid= parameters, scoring = 'accuracy', cv = 10)
 grid_search = grid_search.fit(X_train, y_train)
 best_estimator = grid_search.best_estimator_
 best_params = grid_search.best_params_
@@ -141,16 +143,10 @@ y_pred_best = best_estimator.predict(X_test)
 # Making the confusion matrix to know how our ENHANCED model did
 # ---> trace of the confusion_matrix represents the correct predictions, else all are wrong predictions
 from sklearn.metrics import confusion_matrix, accuracy_score
-cm_linear_best = confusion_matrix(y_test, y_pred_best)
+cm_knn_best = confusion_matrix(y_test, y_pred_best)
 accuracy_after = accuracy_score(y_test, y_pred_best)*100
 
-# --- K-Fold Cross Validation (Best Model) --- #
-from sklearn.model_selection import cross_val_score
-accuracies_before = cross_val_score(estimator = best_estimator, X = X_train, y = y_train, cv = 10, scoring = 'accuracy')
-print('Accuracy Mean after enhancing the model =', accuracies_before.mean())
-print('Accuracy Standard Deviation after enhancing the model =', accuracies_before.std())
-
-# Visualising the Training set results (Best Linear Model)
+# Visualising the Training set results (Best knn Model)
 from matplotlib.colors import ListedColormap
 fig = plt.figure(dpi = 100, figsize = (8,6))
 X_set, y_set = X_train, y_train
@@ -163,14 +159,14 @@ plt.ylim(X2.min(), X2.max())
 for i, j in enumerate(np.unique(y_set)):
     plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
                 c = ListedColormap(('red', 'green'))(i), label = j, marker = '.', s = 75)
-plt.title('Logistic Classifier (Training set)')
+plt.title('KNN (Training set)')
 plt.xlabel('')
 plt.ylabel('')
 plt.legend()
 plt.show()
-fig.savefig("Logistic_Classification_training_Best.png")
+fig.savefig("KNN_training_Best.png")
 
-# Visualising the Test set results (Best Linear Model)
+# Visualising the Test set results (Best knn Model)
 from matplotlib.colors import ListedColormap
 fig = plt.figure(dpi = 100, figsize = (8,6))
 X_set, y_set = X_test, y_test
@@ -183,11 +179,11 @@ plt.ylim(X2.min(), X2.max())
 for i, j in enumerate(np.unique(y_set)):
     plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
                 c = ListedColormap(('red', 'green'))(i), label = j, marker = '.', s = 75)
-plt.title('Logistic Classification (Test set)')
+plt.title('KNN (Test set)')
 plt.xlabel('')
 plt.ylabel('')
 plt.legend()
 plt.show()
-fig.savefig("Logistic_Classification_test_Best.png")
+fig.savefig("KNN_test_Best.png")
 
-# =============== Logistic Classification Complete ================= #
+# =============== KNN Complete ================= #
