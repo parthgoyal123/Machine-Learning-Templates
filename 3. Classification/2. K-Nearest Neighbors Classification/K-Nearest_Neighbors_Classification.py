@@ -146,6 +146,14 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 cm_knn_best = confusion_matrix(y_test, y_pred_best)
 accuracy_after = accuracy_score(y_test, y_pred_best)*100
 
+# --- K-Fold Cross Validation (Best Model) --- #
+from sklearn.model_selection import cross_val_score
+accuracies_after = cross_val_score(estimator = best_estimator, X = X_train, y = y_train, cv = 10, scoring = 'accuracy')
+print('Accuracy Mean after enhancing the model =', accuracies_after.mean())
+accuracy_mean_after = accuracies_after.mean()
+print('Accuracy Standard Deviation after enhancing the model =', accuracies_after.std())
+accuracy_std_after = accuracies_after.std()
+
 # Visualising the Training set results (Best knn Model)
 from matplotlib.colors import ListedColormap
 fig = plt.figure(dpi = 100, figsize = (8,6))

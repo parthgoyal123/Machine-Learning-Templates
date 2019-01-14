@@ -124,7 +124,9 @@ fig.savefig("Logistic_Classification_test_Naive.png")
 from sklearn.model_selection import cross_val_score
 accuracies_before = cross_val_score(estimator = linear_classifier, X = X_train, y = y_train, cv = 10, scoring = 'accuracy')
 print('Accuracy Mean before enhancing the model =', accuracies_before.mean())
+accuracy_mean_before = accuracies_before.mean()
 print('Accuracy Standard Deviation before enhancing the model =', accuracies_before.std())
+accuracy_std_before = accuracies_before.std()
 
 # --- Grid-Search --- #
 from sklearn.model_selection import GridSearchCV
@@ -146,9 +148,11 @@ accuracy_after = accuracy_score(y_test, y_pred_best)*100
 
 # --- K-Fold Cross Validation (Best Model) --- #
 from sklearn.model_selection import cross_val_score
-accuracies_before = cross_val_score(estimator = best_estimator, X = X_train, y = y_train, cv = 10, scoring = 'accuracy')
-print('Accuracy Mean after enhancing the model =', accuracies_before.mean())
-print('Accuracy Standard Deviation after enhancing the model =', accuracies_before.std())
+accuracies_after = cross_val_score(estimator = best_estimator, X = X_train, y = y_train, cv = 10, scoring = 'accuracy')
+print('Accuracy Mean after enhancing the model =', accuracies_after.mean())
+accuracy_mean_after = accuracies_after.mean()
+print('Accuracy Standard Deviation after enhancing the model =', accuracies_after.std())
+accuracy_std_after = accuracies_after.std()
 
 # Visualising the Training set results (Best Linear Model)
 from matplotlib.colors import ListedColormap
