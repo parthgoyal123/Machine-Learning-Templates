@@ -57,7 +57,7 @@ X = X[:, 1:]
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 1)
 
-# Feature Scaling the data --->> For Support Vector Regression, feature scaling is must
+# Feature Scaling the data
 # ---> StandardScaler : no parameters are to be passed to this class, only an object is to be made
 from sklearn.preprocessing import StandardScaler
 scale_X = StandardScaler()
