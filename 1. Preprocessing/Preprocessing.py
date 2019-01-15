@@ -16,7 +16,7 @@ import pandas as pd
 # ---> pandas create a dataframe of the dataset
 # ---> iloc : It locates the column by its index. In other words, using ’iloc’ allows us to take columns by just taking their index.
 # ---> .values : It returns the values of the column (by their index) inside a Numpy array(way more efficient than a list)
-dataset = pd.read_csv("Filename.csv")
+dataset = pd.read_csv("Data.csv")
 X = dataset.iloc[:, :-1].values
 y = dataset.iloc[:, -1].values
 
